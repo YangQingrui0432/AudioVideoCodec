@@ -26,7 +26,7 @@ public class AudioCodecThread extends Thread {
 
     private boolean isStop;
 
-    private long pts;
+    private long startPts;
 
     private MediaMuxerChangeListener listener;
 
@@ -36,7 +36,7 @@ public class AudioCodecThread extends Thread {
         this.bufferInfo = bufferInfo;
         this.mediaMuxer = mediaMuxer;
         this.listener = listener;
-        pts = 0;
+        startPts = 0;
         audioTrackIndex = -1;
     }
 
@@ -84,10 +84,10 @@ public class AudioCodecThread extends Thread {
                     outputBuffer.position(bufferInfo.offset);
                     outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
 
-                    if (pts == 0) {
-                        pts = bufferInfo.presentationTimeUs;
+                    if (startPts == 0) {
+                        startPts = System.nanoTime() / 1000;
                     }
-                    bufferInfo.presentationTimeUs = bufferInfo.presentationTimeUs - pts;
+                    bufferInfo.presentationTimeUs = System.nanoTime() / 1000 - startPts;
                     mediaMuxer.writeSampleData(audioTrackIndex, outputBuffer, bufferInfo);
 
                     audioCodec.releaseOutputBuffer(outputBufferIndex, false);
